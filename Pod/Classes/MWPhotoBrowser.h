@@ -10,8 +10,6 @@
 #import "MWPhoto.h"
 #import "MWPhotoProtocol.h"
 #import "MWCaptionView.h"
-#import <AVFoundation/AVFoundation.h>
-#import <AVKIT/AVKit.h>
 
 // Debug Logging
 #if 0 // Set to 1 to enable debug logging
@@ -22,7 +20,7 @@
 
 @class MWPhotoBrowser;
 
-@protocol MWPhotoBrowserDelegate <NSObject, AVPlayerViewControllerDelegate>
+@protocol MWPhotoBrowserDelegate <NSObject>
 
 - (NSUInteger)numberOfPhotosInPhotoBrowser:(MWPhotoBrowser *)photoBrowser;
 - (id <MWPhoto>)photoBrowser:(MWPhotoBrowser *)photoBrowser photoAtIndex:(NSUInteger)index;

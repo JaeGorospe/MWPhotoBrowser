@@ -7,12 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <AVKit/AVKit.h>
 #import <MBProgressHUD/MBProgressHUD.h>
-#import <MediaPlayer/MediaPlayer.h>
 #import "MWGridViewController.h"
 #import "MWZoomingScrollView.h"
-#import <AVKit/AVKit.h>
-#import <AVFoundation/AVFoundation.h>
 
 // Declare private methods of browser
 @interface MWPhotoBrowser () {
@@ -54,6 +52,7 @@
     UIBarButtonItem *_previousViewControllerBackButton;
     UIImage *_previousNavigationBarBackgroundImageDefault;
     UIImage *_previousNavigationBarBackgroundImageLandscapePhone;
+    UINavigationBarAppearance *_previousNavigationBarScrollEdgeAppearance API_AVAILABLE(ios(13.0));
     
     // Video
     AVPlayerViewController *_currentVideoPlayerViewController;
