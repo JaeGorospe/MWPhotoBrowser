@@ -12,6 +12,8 @@
 #import "MWPhotoBrowserPrivate.h"
 #import "SDImageCache.h"
 #import "UIImage+MWPhotoBrowser.h"
+#import <AVKit/AVKit.h>
+#import <AVFoundation/AVFoundation.h>
 
 #define PADDING                  10
 
@@ -1172,9 +1174,9 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     }
     NSUInteger index = [self indexForPlayButton:sender];
     if (index != NSUIntegerMax) {
-        if (!_currentVideoPlayerViewController) {
+//        if (!_currentVideoPlayerViewController) {
             [self playVideoAtIndex:index];
-        }
+//        }
     }
 }
 
@@ -1224,21 +1226,23 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 - (void)_playVideo:(NSURL *)videoURL atPhotoIndex:(NSUInteger)index {
 
     // Setup player
-    _currentVideoPlayerViewController = [[MPMoviePlayerViewController alloc] initWithContentURL:videoURL];
-    [_currentVideoPlayerViewController.moviePlayer prepareToPlay];
-    _currentVideoPlayerViewController.moviePlayer.shouldAutoplay = YES;
-    _currentVideoPlayerViewController.moviePlayer.scalingMode = MPMovieScalingModeAspectFit;
-    _currentVideoPlayerViewController.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+    _currentVideoPlayerViewController = [AVPlayerViewController alloc];
+    AVPlayer *player = [AVPlayer playerWithURL:videoURL];
+    _currentVideoPlayerViewController.player = player;
+    _currentVideoPlayerViewController.showsPlaybackControls = YES;
+    [self presentViewController:_currentVideoPlayerViewController animated:YES completion:^{
+        [[_currentVideoPlayerViewController player] play];
+    }];
     
     // Remove the movie player view controller from the "playback did finish" notification observers
     // Observe ourselves so we can get it to use the crossfade transition
     [[NSNotificationCenter defaultCenter] removeObserver:_currentVideoPlayerViewController
-                                                    name:MPMoviePlayerPlaybackDidFinishNotification
-                                                  object:_currentVideoPlayerViewController.moviePlayer];
+                                                    name:AVPlayerItemDidPlayToEndTimeNotification
+                                                  object:_currentVideoPlayerViewController.player.currentItem];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(videoFinishedCallback:)
-                                                 name:MPMoviePlayerPlaybackDidFinishNotification
-                                               object:_currentVideoPlayerViewController.moviePlayer];
+                                                 name:AVPlayerItemDidPlayToEndTimeNotification
+                                               object:_currentVideoPlayerViewController.player.currentItem];
 
     // Show
     [self presentViewController:_currentVideoPlayerViewController animated:YES completion:nil];
@@ -1249,8 +1253,8 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     
     // Remove observer
     [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                    name:MPMoviePlayerPlaybackDidFinishNotification
-                                                  object:_currentVideoPlayerViewController.moviePlayer];
+                                                    name:AVPlayerItemDidPlayToEndTimeNotification
+                                                  object:_currentVideoPlayerViewController.player.currentItem];
     
     // Clear up
     [self clearCurrentVideo];
@@ -1269,7 +1273,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 }
 
 - (void)clearCurrentVideo {
-    [_currentVideoPlayerViewController.moviePlayer stop];
+    _currentVideoPlayerViewController.player = nil;
     [_currentVideoLoadingIndicator removeFromSuperview];
     _currentVideoPlayerViewController = nil;
     _currentVideoLoadingIndicator = nil;
